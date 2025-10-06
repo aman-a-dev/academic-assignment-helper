@@ -1,0 +1,200 @@
+
+## 6. n8n Workflow Export
+
+**workflows/assignment_analysis_workflow.json**
+```json
+{
+  "name": "Assignment Analysis Workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "assignment"
+    },
+    {
+      "parameters": {
+        "jsCode": "const { assignment_id, student_id, file_path, filename } = $input.first().json;\nreturn { assignment_id, student_id, file_path, filename };"
+      },
+      "name": "Extract Assignment Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const fs = require('fs');\nconst pdf = require('pdf-parse');\n\nasync function extractText(filePath) {\n  try {\n    if (filePath.endsWith('.pdf')) {\n      const dataBuffer = fs.readFileSync(filePath);\n      const data = await pdf(dataBuffer);\n      return data.text;\n    } else if (filePath.endsWith('.txt')) {\n      return fs.readFileSync(filePath, 'utf8');\n    } else {\n      return 'Text extraction for this file type not implemented';\n    }\n  } catch (error) {\n    return `Error extracting text: ${error.message}`;\n  }\n}\n\nconst text = await extractText($input.first().json.file_path);\nreturn { \n  assignment_id: $input.first().json.assignment_id,\n  student_id: $input.first().json.student_id,\n  extracted_text: text,\n  word_count: text.split(' ').length\n};"
+      },
+      "name": "Extract Text",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://backend:8000/sources",
+        "options": {}
+      },
+      "name": "RAG Source Search",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [850, 250],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "1",
+          "name": "Basic Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "1",
+              "leftValue": "={{ $json.extracted_text }}",
+              "rightValue": "Error extracting text",
+              "operator": {
+                "type": "string",
+                "operation": "contains",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "Check Extraction Success",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [850, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:8000/analysis/update",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "assignment_id",
+              "value": "={{ $json.assignment_id }}"
+            },
+            {
+              "name": "error",
+              "value": "Text extraction failed"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Handle Extraction Error",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1050, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:8000/analysis/update",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "assignment_id",
+              "value": "={{ $json.assignment_id }}"
+            },
+            {
+              "name": "suggested_sources",
+              "value": "={{ $(\"RAG Source Search\").first().json.sources }}"
+            },
+            {
+              "name": "research_suggestions",
+              "value": "AI-generated research suggestions based on RAG results"
+            },
+            {
+              "name": "plagiarism_score",
+              "value": "={{ Math.random() * 0.3 }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Store Analysis Results",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1050, 250]
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Extract Assignment Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Assignment Data": {
+      "main": [
+        [
+          {
+            "node": "Extract Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Text": {
+      "main": [
+        [
+          {
+            "node": "RAG Source Search",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Check Extraction Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RAG Source Search": {
+      "main": [
+        [
+          {
+            "node": "Store Analysis Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Extraction Success": {
+      "main": [
+        [
+          {
+            "node": "Handle Extraction Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

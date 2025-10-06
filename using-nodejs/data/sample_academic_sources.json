@@ -1,0 +1,112 @@
+{
+  "academic_sources": [
+    {
+      "title": "Machine Learning: A Probabilistic Perspective",
+      "authors": "Kevin P. Murphy",
+      "publication_year": 2012,
+      "abstract": "Comprehensive textbook on machine learning that emphasizes probabilistic methods and Bayesian approaches. Covers fundamental algorithms, models, and applications with mathematical rigor.",
+      "full_text": "This textbook provides a comprehensive introduction to machine learning from a probabilistic perspective...",
+      "source_type": "textbook",
+      "keywords": ["machine learning", "probabilistic models", "bayesian inference", "algorithms"]
+    },
+    {
+      "title": "Deep Learning in Natural Language Processing",
+      "authors": "Li Deng, Yang Liu",
+      "publication_year": 2018,
+      "abstract": "Survey of deep learning techniques applied to natural language processing tasks including sentiment analysis, machine translation, and text generation.",
+      "full_text": "In recent years, deep learning has revolutionized the field of natural language processing...",
+      "source_type": "paper",
+      "keywords": ["deep learning", "nlp", "neural networks", "text analysis"]
+    },
+    {
+      "title": "Academic Integrity in the Digital Age",
+      "authors": "Sarah Elaine Eaton, James G. P. Wong",
+      "publication_year": 2021,
+      "abstract": "Examination of academic integrity challenges in online learning environments and technological solutions for plagiarism detection.",
+      "full_text": "The proliferation of digital technologies in education has created new challenges for maintaining academic integrity...",
+      "source_type": "paper",
+      "keywords": ["academic integrity", "plagiarism", "digital learning", "ethics"]
+    },
+    {
+      "title": "Vector Databases and Semantic Search in Education",
+      "authors": "Michael Chen, Alexandra Rodriguez",
+      "publication_year": 2023,
+      "abstract": "Implementation of vector databases for educational content retrieval and personalized learning recommendations using semantic search.",
+      "full_text": "Vector databases enable efficient storage and retrieval of high-dimensional embeddings...",
+      "source_type": "paper",
+      "keywords": ["vector databases", "semantic search", "education technology", "embeddings"]
+    },
+    {
+      "title": "The Impact of AI on Academic Writing",
+      "authors": "Dr. Emily Watson, Prof. Robert Kim",
+      "publication_year": 2022,
+      "abstract": "Analysis of how artificial intelligence tools are transforming academic writing practices and research methodologies.",
+      "full_text": "Artificial intelligence tools are increasingly being integrated into academic writing workflows...",
+      "source_type": "paper",
+      "keywords": ["AI writing", "academic research", "writing tools", "technology impact"]
+    },
+    {
+      "title": "Research Methods in Computer Science",
+      "authors": "John W. Chin, Maria L. Garcia",
+      "publication_year": 2020,
+      "abstract": "Comprehensive guide to research methodologies specific to computer science and information technology disciplines.",
+      "full_text": "Computer science research employs diverse methodologies ranging from experimental studies to theoretical proofs...",
+      "source_type": "textbook",
+      "keywords": ["research methods", "computer science", "methodology", "experimental design"]
+    },
+    {
+      "title": "Ethical Considerations in Educational Technology",
+      "authors": "Dr. Sarah Johnson, Dr. Michael Brown",
+      "publication_year": 2023,
+      "abstract": "Exploration of ethical issues in educational technology implementation including data privacy, algorithmic bias, and digital equity.",
+      "full_text": "As educational technologies become more pervasive, ethical considerations must be addressed...",
+      "source_type": "paper",
+      "keywords": ["ethics", "educational technology", "data privacy", "algorithmic bias"]
+    },
+    {
+      "title": "Neural Networks and Deep Learning",
+      "authors": "Michael Nielsen",
+      "publication_year": 2015,
+      "abstract": "Online textbook providing intuitive explanations of neural networks and deep learning concepts with interactive examples.",
+      "full_text": "Neural networks are computing systems inspired by the biological neural networks...",
+      "source_type": "course_material",
+      "keywords": ["neural networks", "deep learning", "machine learning", "online education"]
+    },
+    {
+      "title": "Automated Essay Scoring Systems",
+      "authors": "David B. Smith, Jennifer K. Wilson",
+      "publication_year": 2019,
+      "abstract": "Review of automated essay scoring technologies and their application in educational assessment and feedback systems.",
+      "full_text": "Automated essay scoring systems use natural language processing and machine learning...",
+      "source_type": "paper",
+      "keywords": ["essay scoring", "automated assessment", "nlp", "education technology"]
+    },
+    {
+      "title": "Data Structures and Algorithm Analysis",
+      "authors": "Mark Allen Weiss",
+      "publication_year": 2014,
+      "abstract": "Comprehensive textbook covering fundamental data structures and algorithms with rigorous analysis of time and space complexity.",
+      "full_text": "Data structures are specialized formats for organizing, processing, and storing data...",
+      "source_type": "textbook",
+      "keywords": ["data structures", "algorithms", "complexity analysis", "computer science"]
+    },
+    {
+      "title": "The Future of Online Education Platforms",
+      "authors": "Dr. Amanda Chen, Prof. James Wilson",
+      "publication_year": 2023,
+      "abstract": "Analysis of emerging trends in online education platforms and their impact on learning outcomes and educational accessibility.",
+      "full_text": "Online education platforms have evolved significantly in recent years...",
+      "source_type": "paper",
+      "keywords": ["online education", "learning platforms", "edtech", "digital learning"]
+    },
+    {
+      "title": "Citation Analysis and Research Impact",
+      "authors": "Dr. Robert Martinez, Dr. Lisa Thompson",
+      "publication_year": 2021,
+      "abstract": "Study of citation patterns and their relationship to research impact across different academic disciplines.",
+      "full_text": "Citation analysis provides insights into the impact and influence of academic research...",
+      "source_type": "paper",
+      "keywords": ["citation analysis", "research impact", "bibliometrics", "academic publishing"]
+    }
+  ]
+}

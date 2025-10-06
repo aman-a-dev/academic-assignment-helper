@@ -1,0 +1,24 @@
+{
+   "name": "academic-assignment-helper-backend",
+   "version": "1.0.0",
+   "description": "RAG-powered academic assignment helper with plagiarism detection",
+   "main": "app.js",
+   "scripts": {
+      "start": "node app.js",
+      "dev": "nodemon app.js"
+   },
+   "author": "Amanuel Antenh",
+   "license": "ISC",
+   "dependencies": {
+      "bcryptjs": "^3.0.2",
+      "cors": "^2.8.5",
+      "dotenv": "^17.2.2",
+      "express": "^5.1.0",
+      "formidable": "^3.5.4",
+      "jsonwebtoken": "^9.0.2",
+      "nodemailer": "^7.0.6"
+   },
+   "devDependencies": {
+      "nodemon": "^3.0.1"
+   }
+}

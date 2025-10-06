@@ -1,0 +1,344 @@
+{
+  "name": "Academic Assignment Analysis Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "assignment",
+        "responseMode": "onReceived"
+      },
+      "id": "1a2b3c4d-5e6f-7g8h-9i0j-k1l2m3n4o5p6",
+      "name": "Assignment Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "assignment-analysis-webhook"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract data from webhook\nconst assignmentData = $input.first().json;\n\n// Prepare data for processing\nconst output = {\n  assignment_id: assignmentData.assignment_id,\n  student_id: assignmentData.student_id,\n  filename: assignmentData.filename,\n  text_content: assignmentData.text_content,\n  file_buffer: assignmentData.file_buffer,\n  timestamp: new Date().toISOString()\n};\n\nreturn [{\n  json: output\n}];"
+      },
+      "id": "2b3c4d5e-6f7g-8h9i-0j1k-l2m3n4o5p6q7",
+      "name": "Extract Assignment Data",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4",
+        "options": {},
+        "systemMessage": "You are an academic analysis assistant. Analyze the assignment text and extract:\n1. Main topic and key themes\n2. Research questions identified\n3. Academic level (Undergraduate, Graduate, PhD)\n4. Word count\n5. Key concepts for research\n\nProvide structured JSON output.",
+        "text": "Analyze the following academic assignment:\n\nFilename: {{ $json.filename }}\nText Content: {{ $json.text_content }}\n\nProvide analysis in this JSON format:\n{\n  \"topic\": \"main topic\",\n  \"key_themes\": [\"theme1\", \"theme2\"],\n  \"research_questions\": [\"question1\", \"question2\"],\n  \"academic_level\": \"Undergraduate/Graduate/PhD\",\n  \"word_count\": number,\n  \"key_concepts\": [\"concept1\", \"concept2\"]\n}"
+      },
+      "id": "3c4d5e6f-7g8h-9i0j-1k2l-m3n4o5p6q7r8",
+      "name": "AI Assignment Analysis",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 2,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4",
+        "options": {},
+        "systemMessage": "You are a research assistant. Based on the assignment topic and key concepts, suggest relevant academic sources and provide citation recommendations.",
+        "text": "Assignment Topic: {{ $json.topic }}\nKey Concepts: {{ $json.key_concepts }}\nAcademic Level: {{ $json.academic_level }}\n\nProvide source suggestions and citation recommendations in JSON format:\n{\n  \"suggested_sources\": [\n    {\n      \"title\": \"Source Title\",\n      \"authors\": \"Author Names\",\n      \"type\": \"book/journal/website\",\n      \"relevance\": \"high/medium/low\",\n      \"reasoning\": \"Why this source is relevant\"\n    }\n  ],\n  \"citation_recommendations\": {\n    \"preferred_style\": \"APA/MLA/Chicago\",\n    \"recommendations\": [\"specific formatting tips\"]\n  }\n}"
+      },
+      "id": "4d5e6f7g-8h9i-0j1k-2l3m-n4o5p6q7r8s9",
+      "name": "Research Suggestions",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 2,
+      "position": [680, 400]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4",
+        "options": {},
+        "systemMessage": "You are a plagiarism detection system. Analyze the text for potential plagiarism by comparing with academic writing patterns. Identify sections that may need citation or could be problematic.",
+        "text": "Analyze the following assignment text for potential plagiarism issues:\n\nText: {{ $json.text_content }}\nTopic: {{ $json.topic }}\n\nProvide analysis in JSON format:\n{\n  \"plagiarism_score\": 0.85,\n  \"confidence_score\": 0.92,\n  \"flagged_sections\": [\n    {\n      \"text\": \"excerpt from assignment\",\n      \"reason\": \"potential uncited content\",\n      \"suggested_action\": \"add citation or rephrase\",\n      \"similarity_estimate\": 0.78\n    }\n  ],\n  \"overall_assessment\": \"clean/potential_issues/concerns\"\n}"
+      },
+      "id": "5e6f7g8h-9i0j-1k2l-3m4n-o5p6q7r8s9t0",
+      "name": "Plagiarism Detection",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 2,
+      "position": [880, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Combine all analysis results\nconst assignmentData = $input.all()[0].json;\nconst aiAnalysis = $input.all()[1].json;\nconst researchSuggestions = $input.all()[2].json;\nconst plagiarismAnalysis = $input.all()[3].json;\n\n// Parse JSON responses from AI\nconst aiAnalysisParsed = typeof aiAnalysis === 'string' ? JSON.parse(aiAnalysis) : aiAnalysis;\nconst researchParsed = typeof researchSuggestions === 'string' ? JSON.parse(researchSuggestions) : researchSuggestions;\nconst plagiarismParsed = typeof plagiarismAnalysis === 'string' ? JSON.parse(plagiarismAnalysis) : plagiarismAnalysis;\n\nconst combinedResult = {\n  assignment_id: assignmentData.assignment_id,\n  student_id: assignmentData.student_id,\n  analysis_timestamp: new Date().toISOString(),\n  \n  // From AI Analysis\n  topic: aiAnalysisParsed.topic,\n  key_themes: aiAnalysisParsed.key_themes,\n  research_questions: aiAnalysisParsed.research_questions,\n  academic_level: aiAnalysisParsed.academic_level,\n  word_count: aiAnalysisParsed.word_count,\n  key_concepts: aiAnalysisParsed.key_concepts,\n  \n  // From Research Suggestions\n  suggested_sources: researchParsed.suggested_sources,\n  citation_recommendations: researchParsed.citation_recommendations,\n  \n  // From Plagiarism Detection\n  plagiarism_score: plagiarismParsed.plagiarism_score,\n  confidence_score: plagiarismParsed.confidence_score,\n  flagged_sections: plagiarismParsed.flagged_sections,\n  overall_assessment: plagiarismParsed.overall_assessment,\n  \n  // Additional metadata\n  processing_time: Date.now() - new Date(assignmentData.timestamp).getTime()\n};\n\nreturn [{\n  json: combinedResult\n}];"
+      },
+      "id": "6f7g8h9i-0j1k-2l3m-4n5o-p6q7r8s9t0u1",
+      "name": "Combine Results",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1080, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = $input.first().json;\n\n// Prepare data for database insertion\nconst dbPayload = {\n  assignment_id: results.assignment_id,\n  suggested_sources: results.suggested_sources,\n  plagiarism_score: results.plagiarism_score,\n  flagged_sections: results.flagged_sections,\n  research_suggestions: JSON.stringify({\n    key_themes: results.key_themes,\n    research_questions: results.research_questions,\n    key_concepts: results.key_concepts\n  }),\n  citation_recommendations: JSON.stringify(results.citation_recommendations),\n  confidence_score: results.confidence_score\n};\n\n// Update assignment with topic and academic level\nconst updateAssignment = {\n  assignment_id: results.assignment_id,\n  topic: results.topic,\n  academic_level: results.academic_level,\n  word_count: results.word_count\n};\n\nreturn [\n  { json: { action: 'update_assignment', data: updateAssignment } },\n  { json: { action: 'insert_analysis', data: dbPayload } }\n];"
+      },
+      "id": "7g8h9i0j-1k2l-3m4n-5o6p-q7r8s9t0u1v2",
+      "name": "Prepare Database Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1280, 250]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:3000/internal/update-assignment",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpBasicAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "jsonBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "assignment_id",
+              "value": "={{ $json.data.assignment_id }}"
+            },
+            {
+              "name": "topic",
+              "value": "={{ $json.data.topic }}"
+            },
+            {
+              "name": "academic_level",
+              "value": "={{ $json.data.academic_level }}"
+            },
+            {
+              "name": "word_count",
+              "value": "={{ $json.data.word_count }}"
+            }
+          ]
+        }
+      },
+      "id": "8h9i0j1k-2l3m-4n5o-6p7q-r8s9t0u1v2w3",
+      "name": "Update Assignment Metadata",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1480, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:3000/internal/analysis-results",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpBasicAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "jsonBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "assignment_id",
+              "value": "={{ $json.data.assignment_id }}"
+            },
+            {
+              "name": "suggested_sources",
+              "value": "={{ $json.data.suggested_sources }}"
+            },
+            {
+              "name": "plagiarism_score",
+              "value": "={{ $json.data.plagiarism_score }}"
+            },
+            {
+              "name": "flagged_sections",
+              "value": "={{ $json.data.flagged_sections }}"
+            },
+            {
+              "name": "research_suggestions",
+              "value": "={{ $json.data.research_suggestions }}"
+            },
+            {
+              "name": "citation_recommendations",
+              "value": "={{ $json.data.citation_recommendations }}"
+            },
+            {
+              "name": "confidence_score",
+              "value": "={{ $json.data.confidence_score }}"
+            }
+          ]
+        }
+      },
+      "id": "9i0j1k2l-3m4n-5o6p-7q8r-s9t0u1v2w3x4",
+      "name": "Store Analysis Results",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1480, 350]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "1a2b3c4d-5e6f-7g8h-9i0j-k1l2m3n4o5p6",
+              "leftValue": "={{ $json.overall_assessment }}",
+              "rightValue": "concerns",
+              "operator": {
+                "type": "string",
+                "operation": "contains",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6",
+      "name": "Check Plagiarism Concerns",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1280, 450]
+    },
+    {
+      "parameters": {
+        "channel": "C012ABCDEFG",
+        "text": "🚨 Academic Integrity Alert\n\nAssignment ID: {{ $json.assignment_id }}\nStudent ID: {{ $json.student_id }}\nPlagiarism Score: {{ $json.plagiarism_score }}\nAssessment: {{ $json.overall_assessment }}\n\nFlagged sections: {{ $json.flagged_sections.length }}\n\nPlease review this assignment for potential academic integrity issues."
+      },
+      "id": "b2c3d4e5-f6g7-h8i9-j0k1-l2m3n4o5p6q7",
+      "name": "Slack Notification",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [1480, 450]
+    }
+  ],
+  "connections": {
+    "Assignment Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Assignment Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Assignment Data": {
+      "main": [
+        [
+          {
+            "node": "AI Assignment Analysis",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Research Suggestions",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Plagiarism Detection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Assignment Analysis": {
+      "main": [
+        [
+          {
+            "node": "Combine Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Suggestions": {
+      "main": [
+        [
+          {
+            "node": "Combine Results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Plagiarism Detection": {
+      "main": [
+        [
+          {
+            "node": "Combine Results",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Combine Results": {
+      "main": [
+        [
+          {
+            "node": "Prepare Database Payload",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check Plagiarism Concerns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Database Payload": {
+      "main": [
+        [
+          {
+            "node": "Update Assignment Metadata",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Store Analysis Results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Check Plagiarism Concerns": {
+      "main": [
+        [
+          {
+            "node": "Slack Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "versionId": "1",
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0
+}

@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: academic_postgres
+    environment:
+      POSTGRES_DB: academic_helper
+      POSTGRES_USER: student
+      POSTGRES_PASSWORD: secure_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - academic_network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: academic_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@academic.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    networks:
+      - academic_network
+    depends_on:
+      - postgres
+
+  redis:
+    image: redis:alpine
+    container_name: academic_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - academic_network
+
+  n8n:
+    image: n8nio/n8n
+    container_name: academic_n8n
+    environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_DATABASE=academic_helper
+      - DB_POSTGRESDB_USER=student
+      - DB_POSTGRESDB_PASSWORD=secure_password
+      - N8N_BASIC_AUTH_ACTIVE=false
+      - WEBHOOK_URL=http://n8n:5678/
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - academic_network
+    depends_on:
+      - postgres
+
+  backend:
+    build: ./backend
+    container_name: academic_backend
+    environment:
+      - DATABASE_URL=postgresql://student:secure_password@postgres:5432/academic_helper
+      - JWT_SECRET_KEY=your_super_secret_jwt_key_here_change_in_production
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - N8N_WEBHOOK_URL=http://n8n:5678/webhook/assignment
+      - REDIS_URL=redis://redis:6379
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./uploads:/app/uploads
+    networks:
+      - academic_network
+    depends_on:
+      - postgres
+      - redis
+      - n8n
+
+volumes:
+  postgres_data:
+  n8n_data:
+
+networks:
+  academic_network:
+    driver: bridge
