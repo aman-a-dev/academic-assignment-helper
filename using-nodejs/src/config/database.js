@@ -1,6 +1,6 @@
 const { Pool } = require('pg');
 
-const pool = new Pool({
+/* const pool = new Pool({
   host: process.env.POSTGRES_HOST || 'localhost',
   port: process.env.POSTGRES_PORT || 5432,
   database: process.env.POSTGRES_DB || 'academic_helper',
@@ -9,8 +9,13 @@ const pool = new Pool({
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
+}); */
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false // Neon requires SSL
+  }
 });
-
 // Test connection
 pool.on('connect', () => {
   console.log('Connected to PostgreSQL database');
