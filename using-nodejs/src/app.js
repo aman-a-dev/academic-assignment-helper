@@ -12,7 +12,7 @@ dotenv.config();
 const authRoutes = require("./routes/auth");
 const uploadRoutes = require("./routes/upload");
 const analysisRoutes = require("./routes/analysis");
-const sourcesRoutes = require("./routes/sources");
+//const sourcesRoutes = require("./routes/sources");
 
 const app = express();
 
@@ -40,7 +40,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/auth", authRoutes);
 app.use("/upload", uploadRoutes);
 app.use("/analysis", analysisRoutes);
-app.use("/sources", sourcesRoutes);
+//app.use("/sources", sourcesRoutes);
 
 // Health check
 app.get("/health", (req, res) => {
@@ -57,10 +57,9 @@ app.use((err, req, res, next) => {
 });
 
 // 404 handler
-app.use("*", (req, res) => {
-   res.status(404).json({ error: "Route not found" });
+app.use((req, res) => {
+  res.status(404).json({ message: "Route not found" });
 });
-
 const PORT = process.env.PORT || 9000;
 app.listen(PORT, () => {
    console.log(`Server running on port ${PORT}`);
